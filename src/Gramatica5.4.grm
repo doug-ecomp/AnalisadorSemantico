@@ -1,0 +1,147 @@
+﻿"Name"     = 'Enter the name of the grammar'
+"Author"   = 'Enter your name'
+"Version"  = 'The version of the grammar and/or language'
+"About"    = 'A short description of the grammar'
+
+"Start Symbol" = <arquivo>
+"Case Sensitive" = True
+
+! -------------------------------------------------
+! Character Sets
+! -------------------------------------------------
+
+{String Chars} = {Printable} + {HT} - ["]
+{Chars} = {Printable} + {HT} - ['']               
+
+! -------------------------------------------------
+! Terminals
+! -------------------------------------------------
+
+Identifier    = {Letter}({Letter}|{AlphaNumeric}|_)*
+Cadeia = '"' {String Chars}* '"'
+Numero = {Number} + ('.'{Number} + )?
+Char1 = '' {Chars} ''
+
+! -------------------------------------------------
+! Rules
+! -------------------------------------------------
+
+! The grammar starts below
+
+<lambda> ::=
+          
+!Estrutura do arquivo
+<arquivo> ::= <constantes> <variaveis> <pre_main>
+<pre_main> ::= <main><classes> | <classe> <pre_main>
+<classes> ::= <classe> <classes> |<lambda>
+<constantes> ::= <const><constantes> | <lambda> 
+<variaveis> ::= <declaracao_variavel> <variaveis> | <lambda>
+<main> ::= 'void' 'main' '(' ')' '{' <conteudo_metodo> '}'
+
+!Estrutura de uma classe
+<classe> ::= 'class' Identifier <expressao_heranca> '{' <conteudo_classe> '}'
+<expressao_heranca> ::= '>' Identifier | <lambda>
+<conteudo_classe> ::= <id_declaracao><conteudo_classe> | <const> <conteudo_classe>|<lambda>
+
+!Declaração de constantes 
+<const>::= 'const' '{' <bloco_constantes> '}'
+<bloco_constantes> ::= <tipo_primitivo> <lista_const> | <lambda>
+<lista_const> ::= Identifier '=' <atribuicao_costante> <aux_declaracao>
+<aux_declaracao>::= ','<lista_const> | ';' <bloco_constantes>
+<atribuicao_costante> ::= Numero | Char1 | Cadeia | <boolean>
+<boolean>::= 'true' | 'false'
+
+!Declaração variveis, metodos e vetores
+<declaracao_variavel> ::= <tipo_primitivo> Identifier <lista_variavel>
+<id_declaracao> ::= <tipo> Identifier <comp_id> | 'void' Identifier '(' <decl_parametros> ')' '{' <conteudo_metodo> '}' 
+<tipo> ::= Identifier | <tipo_primitivo>
+<comp_id> ::=  '['<indice>']' <lista_vetor> | '(' <decl_parametros> ')' '{' <conteudo_metodo> 'return' <retorno> '}' | <lista_variavel>
+<lista_variavel> ::= ',' Identifier <lista_variavel> | ';'
+<lista_vetor>::=',' Identifier '['<indice>']' <lista_vetor>  | ';'
+<tipo_primitivo> ::= 'int' | 'char' | 'bool' | 'string' | 'float'
+
+!indice de declaração de vetor
+<indice> ::= Numero | Identifier
+
+!parametros declaração de função
+<decl_parametros> ::= <tipo> Identifier <var_vet> <lista_parametros> | <lambda>
+<lista_parametros> ::= ','<tipo> Identifier <var_vet> <lista_parametros> | <lambda>
+<var_vet>::='[' <indice> ']' | <lambda>
+
+!conteudo de metodo
+<conteudo_metodo> ::= <comando><conteudo_metodo> | <lambda>
+<comando> ::=  <read> | <write> | Identifier <id_comando> | <inicializa_objeto> | <tipo> Identifier <id_decl> | <if> | <while> 
+<id_decl> ::= '['<indice>']' <lista_vetor> | <lista_variavel>
+<id_comando> ::= '(' <parametros> ')' ';' | '.' Identifier <acesso_objeto> ';' | '=' <atribuicao> ';' | '[' <indice> ']' '=' <atribuicao> ';'
+<acesso_objeto>::='(' <parametros> ')' |  '=' <atribuicao>
+
+!atribuição 
+<atribuicao> ::= '('<atribuicao>')'<operacao>| <id_acesso> | Numero <operador_numero> | Cadeia | Char1 | <boolean> <op_logico> | '-'<negativo>
+<operador_numero> ::= <operador_relacional> <exp_aritmetica><op_logico>|<operador_aritmetico><exp_aritmetica><exp_relacional_opcional>|<operador_igualdade><exp_aritmetica><op_logico>| <lambda>
+<negativo> ::= '('<negativo>')'|<id_acesso> | Numero<operador_numero>
+<exp_relacional_opcional>::=<operador_relacional><exp_aritmetica><op_logico>| <lambda>
+<op_logico> ::= <operador_igualdade><exp_logica> |<operador_logico><exp> |<lambda>
+<retorno> ::= <atribuicao> ';' 
+           
+<id_acesso> ::= <operador_incremento> Identifier <operacao> | Identifier <acesso><operacao>
+<acesso> ::= '['<indice>']' | '(' <parametros> ')'  | '.' Identifier <chamada_metodo> |<operador_incremento> | <lambda>
+<operacao>::=<operador>|<lambda>
+<chamada_metodo> ::= '(' <parametros> ')'| <lambda>
+<operador> ::= <operador_relacional> <exp_aritmetica><op_logico> | <operador_aritmetico><exp_aritmetica><exp_relacional_opcional>| <operador_igualdade><atribuicao>| <operador_logico><exp>
+<parametros> ::= <atribuicao><novo_parametro> |<lambda>
+<novo_parametro> ::= ','<parametros> | <lambda> 
+
+!Inicialização de objetos
+<inicializa_objeto> ::= 'new'Identifier';'
+
+!Comandos
+
+!while
+<while>::= 'while' '(' <exp> ')' '{' <conteudo_estrutura> '}'
+
+!Comando read
+<read> ::= 'read' '('Identifier<lista_read>')' ';'
+<lista_read> ::= ',' Identifier<lista_read>|<lambda>
+
+!Comando write
+<write> ::= 'write' '(' <parametros_write> ')' ';'
+<parametros_write>::=<imprimiveis><novo_parametro_write>
+<novo_parametro_write> ::= ','<parametros_write> | <lambda>
+<imprimiveis> ::= '('<imprimiveis>')'|Identifier<op_write> | Numero <op_write> | Cadeia | Char1
+<op_write>::=<operador_aritmetico><exp_aritmetica> | <lambda>
+
+!if
+<if>::= 'if' '(' <exp> ')' '{' <conteudo_estrutura> '}' <complemento_if>
+<complemento_if> ::= 'else' '{'<conteudo_estrutura>'}' | <lambda>
+!!!!!!conteudo_estrutura
+<conteudo_estrutura> ::= <comando_estrutura><conteudo_estrutura> | <lambda>
+<comando_estrutura> ::=  <read> | <write> | Identifier <id_comando> | <inicializa_objeto> | <if> | <while> 
+!!!!!
+!Expressões lógicas 
+<exp> ::= <boolean> <complemento_logico> | <operador_incremento> Identifier <id_exp><complemento_aritmetico1>| Identifier <id_exp_arit><complemento_aritmetico1>| Numero<complemento_aritmetico><op_relacional> |'(' <exp_logica> ')' <complemento_exp_logica>  
+<complemento_aritmetico1>::=<operador_aritmetico><fator_aritmetico><op_id_relacional>| <op_id_logico>
+
+<exp_logica> ::= <boolean> <complemento_logico> | <operador_incremento> Identifier <id_exp><complemento_aritmetico><op_id_logico> | Identifier <id_exp_arit><complemento_aritmetico><op_id_logico>| Numero<complemento_aritmetico><co_op_relacional> |'(' <exp_logica> ')' <complemento_exp_logica> 
+<co_op_relacional>::= <op_relacional> | <lambda>  | <operador_logico><exp>          
+<complemento_exp_logica>::=<operador_logico><exp>|<operador_igualdade><exp_logica>|<operador_aritmetico><fator_aritmetico><complemento_logico>|<operador_relacional><fator_aritmetico><complemento_logico>|<lambda>
+
+<id_exp> ::= '['<indice>']' | '(' <parametros> ')'  | '.' Identifier <chamada_metodo> |<lambda>
+<op_id_logico>::=<operador_logico><exp>|<op_id_relacional>| <lambda>
+<complemento_logico>::=<operador_logico><exp>| <operador_igualdade><exp_logica>|<lambda>
+<operador_logico>::= '&&' | '||'
+<operador_igualdade>::= '!=' | '==' 
+
+!Expressões relacionais 
+<op_relacional>::=<operador_relacional><exp_aritmetica><op_logico>|<operador_igualdade><exp_aritmetica><op_logico>
+<op_id_relacional>::=<operador_relacional><exp_aritmetica><op_logico>|<operador_igualdade><exp_logica>
+<operador_relacional>::=  '>' | '<' | '>=' | '<='
+
+!Expressões aritméticas  
+<exp_aritmetica>::=<fator_aritmetico>|'-'<exp_aritmetica>
+<fator_aritmetico>::= <id_aritmetico><complemento_aritmetico>| Numero<complemento_aritmetico>| '('<fator_aritmetico>')'<complemento_aritmetico>
+<id_aritmetico>::=<operador_incremento>Identifier | Identifier <id_exp_arit> 
+<id_exp_arit>::= <id_exp> | <operador_incremento>
+
+<complemento_aritmetico>::=<operador_aritmetico><fator_aritmetico>| <lambda>
+<operador_aritmetico>::= '+' | '-' | '*' | '/'
+<operador_incremento>::= '++' | '--'

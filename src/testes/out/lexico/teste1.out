@@ -1,0 +1,12 @@
+class palavra_reservada 1:1
+a id 1:7
+{ delimitador 1:9
+} delimitador 2:1
+void palavra_reservada 3:1
+main palavra_reservada 3:6
+( delimitador 3:10
+) delimitador 3:11
+{ delimitador 3:12
+} delimitador 4:1
+
+nao ha erros lexicos

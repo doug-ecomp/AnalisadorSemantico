@@ -1,0 +1,10 @@
+1 falta abre parenteses
+3 falta fecha parenteses
+12 falta abre chaves
+17 falta fecha chaves
+18 falta abre colchetes
+18 falta fecha colchetes
+19 falta ponto e virgula
+20 falta identificador
+21 falta palavra reservada: int, float, bool, void
+35 falta palavra reservada: class

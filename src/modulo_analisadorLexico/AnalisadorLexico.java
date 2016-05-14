@@ -1,7 +1,6 @@
 package modulo_analisadorLexico;
 
 import java.util.ArrayList;
-import modulo_completo.TabelaSimbolos;
 
 /**
  * Classe destinada à análise léxica do código fonte. Nessa classe são

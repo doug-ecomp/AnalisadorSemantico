@@ -1,4 +1,8 @@
-class a { 
-}
-void main(){
+const
+{
+int a = 1, cc=20, cc = 2.0;
+string b = "test";
+char d = 'a';
+bool aa = true;
+
 }

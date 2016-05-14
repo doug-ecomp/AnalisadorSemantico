@@ -1,5 +1,6 @@
 package modulo_completo;
 
+import TabelaSimbolos.Simbolo;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import modulo_analisadorSintatico.AnalisadorSintatico;
  */
 public class Compilador {
 
-    Simbolos tabelaSimbolos;
 
     /**
      * Manipulador dos documentos de entrada e saída.
@@ -59,18 +59,20 @@ public class Compilador {
             System.exit(0);
         }
         for (String lF : localFiles) { // Para cada arquivo fonte, o analisador léxico gera as listas de tokens e erros (se houver).
-            tabelaSimbolos = new Simbolos(); //cria a tabela de simbolos
-            tabelaSimbolos.setNome("GLOBAL"); //nomeia o primeiro simbolo como global
+        
             ArrayList<String> codigoFonte = arquivo.lerCodigoFonte(lF);
+            
             analisadorLexico = new AnalisadorLexico();
             analisadorLexico.analise(codigoFonte);
             arquivo.escreverSaidaLexico(analisadorLexico.getTokens(), analisadorLexico.getErros());
+            
             ArrayList<Token> listaTokens;
             listaTokens = arquivo.lerSaidaLexico();
-            analisadorSintatico = new AnalisadorSintatico(tabelaSimbolos);
+            
+            analisadorSintatico = new AnalisadorSintatico();
             analisadorSintatico.analise(listaTokens);
+            
             arquivo.escreverSaidaSintatico(analisadorSintatico.getErros());
-            System.out.println(tabelaSimbolos);
         }
     }
 
@@ -80,7 +82,7 @@ public class Compilador {
      * @param args
      */
     public static void main(String args[]) {
-
+        
         try {
             Compilador compilador = new Compilador(); // Cria o compilador.
             compilador.compilar(); // Executa o compilador.

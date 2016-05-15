@@ -21,12 +21,12 @@ public class Simbolo {
     public static final int OBJECT = 5;
     public static final int VOID = 6;
 
-    public static final int VAR = 10;
-    public static final int CONST = 11;
-    public static final int MET = 12;
-    public static final int CLASS = 13;
-    public static final int VET = 14;
-    public static final int MAIN = 15;
+//    public static final int VAR = 10;
+//    public static final int CONST = 11;
+//    public static final int MET = 12;
+//    public static final int CLASS = 13;
+//    public static final int VET = 14;
+//    public static final int MAIN = 15;
 
     private String lexeme;
     private Category categoria;
@@ -61,14 +61,6 @@ public class Simbolo {
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
-
-//    public TabelaSimbolos getFilhos() {
-//        return filhos;
-//    }
-
-//    public void setFilhos(TabelaSimbolos filhos) {
-//        this.filhos = filhos;
-//    }
 
     @Override
     public String toString() {

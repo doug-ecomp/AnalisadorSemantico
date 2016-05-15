@@ -43,7 +43,7 @@ public class AnalisadorSemantico {
         while( !(temp == null) ){
             sy = temp.get(symbol.getLexeme());
             if( sy != null){
-                if( !(sy.getCategoria()==Category.VAR || sy.getCategoria()==Category.VETOR) ){
+                if( !(sy.getCategoria()==Category.VARIAVEL || sy.getCategoria()==Category.VETOR) ){
                     category = true;
                 }
                 
@@ -86,4 +86,29 @@ public class AnalisadorSemantico {
                 }
     }
     
+    public MyHashMap<String, Simbolo> getEscopo_global() {
+        return escopo_global;
+    }
+
+    public MyHashMap<String, Simbolo> getEscopo_atual() {
+        return escopo_atual;
+    }
+    
+    public void setEscopo_atual(MyHashMap<String, Simbolo> escopo_atual) {
+        this.escopo_atual = escopo_atual;
+    }
+    
+    public Simbolo SearchAndMatchCatg(String id, Category catg, MyHashMap<String, Simbolo> hash, int line){
+        Simbolo sy = hash.get(id);
+        if(sy!=null){
+            if(sy.getCategoria()!=catg){
+                System.out.println(line + " ID " + id +" não é "+catg.toString().toLowerCase());
+                return null;
+            }                
+            else
+                return sy;
+        }
+        System.out.println(line + " ID " + id+" não existe");
+        return null;
+    }
 }

@@ -12,9 +12,9 @@ package modulo_completo;
 public enum Category {
     
    
-    CLASS,
-    CONST,
-    VAR,
+    CLASSE,
+    CONSTANTE,
+    VARIAVEL,
     METODO,
     VETOR,
     MAIN,

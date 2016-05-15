@@ -24,7 +24,7 @@ public class SimboloClasse extends Simbolo{
         this.inner_scope = inner_scope;
     }
     
-    public HashMap<String, Simbolo> getInner_scope() {
+    public MyHashMap<String, Simbolo> getInner_scope() {
         return inner_scope;
     }
 

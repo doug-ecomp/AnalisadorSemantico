@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import manipulação_arquivosIO.Arquivo;
 import modulo_analisadorLexico.AnalisadorLexico;
 import modulo_analisadorLexico.Token;
+import modulo_analisadorSemantico.AnalisadorSemantico;
 import modulo_analisadorSintatico.AnalisadorSintatico;
 
 /**
@@ -32,6 +33,7 @@ public class Compilador {
      */
     private AnalisadorLexico analisadorLexico;
     private AnalisadorSintatico analisadorSintatico;
+    private AnalisadorSemantico analisadorSemantico;
 
     /**
      * Construtor da Classe.
@@ -69,10 +71,12 @@ public class Compilador {
             ArrayList<Token> listaTokens;
             listaTokens = arquivo.lerSaidaLexico();
             
-            analisadorSintatico = new AnalisadorSintatico();
+            analisadorSemantico = new AnalisadorSemantico();
+            analisadorSintatico = new AnalisadorSintatico(analisadorSemantico);
             analisadorSintatico.analise(listaTokens);
             
             arquivo.escreverSaidaSintatico(analisadorSintatico.getErros());
+            analisadorSemantico.printErrs();
         }
     }
 

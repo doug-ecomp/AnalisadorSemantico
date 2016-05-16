@@ -19,7 +19,7 @@ public class Simbolo {
     public static final String FLOAT = "float";
     public static final String BOOL = "bool";
     public static final int OBJECT = 5;
-    public static final int VOID = 6;
+    public static final String VOID = "void";
 
 //    public static final int VAR = 10;
 //    public static final int CONST = 11;
@@ -31,9 +31,18 @@ public class Simbolo {
     private String lexeme;
     private Category categoria;
     private String tipo;
+    private int linha;
 
+    
+    public Simbolo(){
+        categoria = null;
+        lexeme = null;
+        tipo = null;
+    }
+    
     public Simbolo(Category categoria) {
         this.categoria = categoria;
+        linha = -1;
         lexeme = null;
         tipo = null;
     }
@@ -60,6 +69,14 @@ public class Simbolo {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+    
+    public int getLinha() {
+        return linha;
+    }
+
+    public void setLinha(int linha) {
+        this.linha = linha;
     }
 
     @Override

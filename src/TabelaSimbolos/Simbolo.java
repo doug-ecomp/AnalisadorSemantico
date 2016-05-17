@@ -18,7 +18,7 @@ public class Simbolo {
     public static final String STRING = "string";
     public static final String FLOAT = "float";
     public static final String BOOL = "bool";
-    public static final int OBJECT = 5;
+    public static final String CLASSE = "classe"; //classes definem tipos
     public static final String VOID = "void";
 
 //    public static final int VAR = 10;

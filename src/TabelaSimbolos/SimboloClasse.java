@@ -21,6 +21,7 @@ public class SimboloClasse extends Simbolo{
     public SimboloClasse(Category categoria, MyHashMap<String, Simbolo> inner_scope) {
         super(categoria);
         heranca_pai = null;
+        setTipo(Simbolo.CLASSE);
         this.inner_scope = inner_scope;
     }
     

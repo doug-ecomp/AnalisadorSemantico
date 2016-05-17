@@ -13,10 +13,11 @@ import java.util.HashMap;
  */
 public class MyHashMap<K, V> extends HashMap<K, V>{
     private MyHashMap<K, V> upper_scope;
-    
-    
+    private SimboloClasse dono;
+
     public MyHashMap(MyHashMap<K, V> upper_scope){
-            this.upper_scope = upper_scope;
+        dono = null;
+        this.upper_scope = upper_scope;
     }   
     
     public MyHashMap<K, V> getUpper_scope() {
@@ -25,6 +26,14 @@ public class MyHashMap<K, V> extends HashMap<K, V>{
 
     public void setUpper_scope(MyHashMap<K, V> upper_scope) {
         this.upper_scope = upper_scope;
+    }
+    
+    public SimboloClasse getDono() {
+        return dono;
+    }
+
+    public void setDono(SimboloClasse dono) {
+        this.dono = dono;
     }
     
     

@@ -229,7 +229,7 @@ public class AnalisadorSintatico {
      */
     private void recMain() {
         
-        atual = new Simbolo(Category.METODO); //cria um simbolo.
+        atual = new SimboloMetodo(Category.METODO); //cria um simbolo.
         atual.setTipo(Simbolo.VOID);
         atual.setLexeme("main");
                 
@@ -261,6 +261,7 @@ public class AnalisadorSintatico {
             case "class":
                 
                 atual = new SimboloClasse(Category.CLASSE, new MyHashMap<>(semantico.getEscopo_global()));
+                ((SimboloClasse)atual).getInner_scope().setDono((SimboloClasse)atual);
                 
                 terminal("class");
                 
@@ -415,19 +416,19 @@ public class AnalisadorSintatico {
                 Tipo("numero");
                 break;
             case "cadeia_constante":
-                semantico.matchTypeStr(atual.getTipo(), proximo.getLinha());
+                semantico.MatchType(proximo.getValor(), Simbolo.STRING, atual.getTipo(), proximo.getLinha());
                 Tipo("cadeia_constante");
                 break;
             case "caractere_constante":
-                semantico.matchTypeChar(atual.getTipo(), proximo.getLinha());
+                semantico.MatchType(proximo.getValor(), Simbolo.CHAR, atual.getTipo(), proximo.getLinha());
                 Tipo("caractere_constante");
                 break;
             default:
                 if (proximo.getValor().equals("true")) {
-                    semantico.matchTypeBool(atual.getTipo(), proximo.getLinha());
+                    semantico.MatchType(proximo.getValor(), Simbolo.BOOL, atual.getTipo(), proximo.getLinha());
                     terminal("true");
                 } else if (proximo.getValor().equals("false")) {
-                    semantico.matchTypeBool(atual.getTipo(), proximo.getLinha());
+                    semantico.MatchType(proximo.getValor(), Simbolo.BOOL, atual.getTipo(), proximo.getLinha());
                     terminal("false");
                 } else {
                     erroSintatico("falta numero, cadeia constante, caracter constante ou boolean");
@@ -531,7 +532,6 @@ public class AnalisadorSintatico {
                 if(proximo.getTipo().equals("id")){
                     atual.setLexeme(proximo.getValor());
                     atual.setLinha(proximo.getLinha());
-                    semantico.addSimbolo(atual);
                 }
                 
                 Tipo("id");
@@ -550,44 +550,79 @@ public class AnalisadorSintatico {
                 break;
             case "char":
                 terminal("char");
-  //              atual.setTipo(Simbolo.CHAR);
- //               atual.setLexeme(proximo.getValor());
+                
+                atual.setTipo(Simbolo.CHAR);
+                if(proximo.getTipo().equals("id")){
+                    atual.setLexeme(proximo.getValor());
+                    atual.setLinha(proximo.getLinha());
+                }
+                
                 Tipo("id");
                 recCompId();
                 break;
             case "int":
                 terminal("int");
-   //             atual.setTipo(Simbolo.INT);
-//                atual.setLexeme(proximo.getValor());
+                
+                atual.setTipo(Simbolo.INT);
+                if(proximo.getTipo().equals("id")){
+                    atual.setLexeme(proximo.getValor());
+                    atual.setLinha(proximo.getLinha());
+                }
+                
                 Tipo("id");
                 recCompId();
                 break;
             case "bool":
                 terminal("bool");
-  //              atual.setTipo(Simbolo.BOOL);
-//                atual.setLexeme(proximo.getValor());
+                
+                atual.setTipo(Simbolo.BOOL);
+                if(proximo.getTipo().equals("id")){
+                    atual.setLexeme(proximo.getValor());
+                    atual.setLinha(proximo.getLinha());
+                }
+                
                 Tipo("id");
                 recCompId();
                 break;
             case "string":
                 terminal("string");
-  //              atual.setTipo(Simbolo.STRING);
-//                atual.setLexeme(proximo.getValor());
+                
+                atual.setTipo(Simbolo.STRING);
+                if(proximo.getTipo().equals("id")){
+                    atual.setLexeme(proximo.getValor());
+                    atual.setLinha(proximo.getLinha());
+                }
+                
                 Tipo("id");
                 recCompId();
                 break;
             case "float":
                 terminal("float");
-  //              atual.setTipo(Simbolo.FLOAT);
-//                atual.setLexeme(proximo.getValor());
+                
+                atual.setTipo(Simbolo.FLOAT);
+                if(proximo.getTipo().equals("id")){
+                    atual.setLexeme(proximo.getValor());
+                    atual.setLinha(proximo.getLinha());
+                }
+                
                 Tipo("id");
                 recCompId();
                 break;
             default:
                 if (proximo.getTipo().equals("id")) {
+                    
+                    ArrayList<Category> aux = new ArrayList<>();
+                    aux.add(Category.CLASSE);
+                    if(semantico.MatchTipoAndCatg(proximo.getValor(), aux, Simbolo.CLASSE, semantico.getEscopo_global(), proximo.getLinha()))
+                        atual.setTipo(proximo.getValor());
+                    
                     Tipo("id");
-  //                  atual.setTipo(Simbolo.OBJECT);
-                    atual.setLexeme(proximo.getValor());
+                    
+                    if(proximo.getTipo().equals("id")){
+                        atual.setLexeme(proximo.getValor());
+                        atual.setLinha(proximo.getLinha());
+                    }
+                    
                     Tipo("id");
                     recCompId();
                     break;
@@ -601,34 +636,56 @@ public class AnalisadorSintatico {
     private void recCompId() {
         switch (proximo.getValor()) {
             case "[":
-  //              atual.setTipo(Simbolo.VET);
+                
+                atual.setCategoria(Category.VETOR);
+                if(atual.getLexeme() != null && atual.getTipo()!=null ){
+                    semantico.addSimbolo(atual);
+                }
+                
                 terminal("[");
                 recIndice();
                 terminal("]");
                 recListaVetor();
                 break;
             case "(":
-   //             atual.setTipo(Simbolo.MET);
-   //             escopo.addFilho(atual);
-//                Simbolo anterior = escopo;
-//                escopo = atual;
+                
+                Simbolo temp = atual;
+                atual = new SimboloMetodo(Category.METODO);
+                atual.setLexeme(temp.getLexeme());
+                atual.setTipo(temp.getTipo());
+                atual.setLinha(temp.getLinha());
+                
                 terminal("(");
+                
+                semantico.setEscopo_atual(new MyHashMap<>(semantico.getEscopo_atual()));
+                
                 recDeclParametros();
                 terminal(")");
                 terminal("{");
                 recConteudoMetodo();
                 terminal("return");
                 recRetorno();
+                
+                semantico.setEscopo_atual(semantico.getEscopo_atual().getUpper_scope());
+                
                 terminal("}");
- //               escopo = anterior;
                 break;
             case ",":
-   //             atual.setTipo(Simbolo.VAR);
+                
+                atual.setCategoria(Category.VARIAVEL);
+                if(atual.getLexeme() != null && atual.getTipo()!=null ){
+                    semantico.addSimbolo(atual);
+                }
+                
                 recListaVariavel();
                 break;
             case ";":
-   //             atual.setTipo(Simbolo.VAR);
-   //             escopo.addFilho(atual);
+                
+                atual.setCategoria(Category.VARIAVEL);
+                if(atual.getLexeme() != null && atual.getTipo()!=null ){
+                    semantico.addSimbolo(atual);
+                }
+                
                 terminal(";");
                 break;
             default:
@@ -705,7 +762,7 @@ public class AnalisadorSintatico {
                 break;
             case "numero":
                 
-                
+                semantico.matchTypeNum(proximo.getValor(), Simbolo.INT, proximo.getLinha());
                 
                 Tipo("numero");
                 break;
@@ -716,7 +773,7 @@ public class AnalisadorSintatico {
     }
 
     private void recDeclParametros() {
-        Simbolo metodo_pai = atual;
+        SimboloMetodo metodo_pai = (SimboloMetodo)atual;
         atual = new Simbolo();
         switch (proximo.getValor()) {
             case "char":
@@ -789,7 +846,10 @@ public class AnalisadorSintatico {
             default:
                 if (proximo.getTipo().equals("id")) {
                     
-                    atual.setTipo(proximo.getValor());
+                    ArrayList<Category> aux = new ArrayList<>();
+                    aux.add(Category.CLASSE);
+                    if(semantico.MatchTipoAndCatg(proximo.getValor(), aux, Simbolo.CLASSE, semantico.getEscopo_global(), proximo.getLinha()))
+                        atual.setTipo(proximo.getValor());
                     
                     Tipo("id");
                     
@@ -823,6 +883,12 @@ public class AnalisadorSintatico {
                 recListaParametros(metodo_pai);
                 break;
             default:
+                if(metodo_pai.getLexeme()!=null && metodo_pai.getTipo()!=null){
+                    MyHashMap<String, Simbolo> aux = semantico.getEscopo_atual();
+                    semantico.setEscopo_atual(semantico.getEscopo_atual().getUpper_scope());
+                    semantico.addSimbolo(metodo_pai);
+                    semantico.setEscopo_atual(aux);
+                }
                 break;
         }
     }
@@ -850,9 +916,13 @@ public class AnalisadorSintatico {
                 terminal("float");
                 break;
             default:
+                
                 if (proximo.getTipo().equals("id")) {
                     
-                    atual.setTipo(proximo.getValor());
+                    ArrayList<Category> aux = new ArrayList<>();
+                    aux.add(Category.CLASSE);
+                    if(semantico.MatchTipoAndCatg(proximo.getValor(), aux, "classe", semantico.getEscopo_global(), proximo.getLinha()))
+                        atual.setTipo(proximo.getValor());
                     
                     Tipo("id");
                 } else {
@@ -867,7 +937,7 @@ public class AnalisadorSintatico {
             case "[":
                 atual.setCategoria(Category.VETOR);
                 ((SimboloMetodo)metodo_pai).addParametro(atual);
-                if(atual.getLexeme() != null){
+                if(atual.getLexeme() != null && atual.getTipo()!=null ){
                     semantico.addSimbolo(atual);
                 }
                 terminal("[");
@@ -877,7 +947,7 @@ public class AnalisadorSintatico {
             default:
                 atual.setCategoria(Category.VARIAVEL);
                 ((SimboloMetodo)metodo_pai).addParametro(atual);
-                if(atual.getLexeme() != null){
+                if(atual.getLexeme() != null && atual.getTipo()!=null){
                     semantico.addSimbolo(atual);
                 }
                 break;
@@ -885,6 +955,7 @@ public class AnalisadorSintatico {
     }
 
     private void recConteudoMetodo() {
+        atual = new Simbolo();
         switch (proximo.getTipo()) {
             case "palavra_reservada":
                 if (proximo.getValor().equals("return")) {

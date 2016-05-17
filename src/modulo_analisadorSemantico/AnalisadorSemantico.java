@@ -7,6 +7,7 @@ package modulo_analisadorSemantico;
 
 import TabelaSimbolos.MyHashMap;
 import TabelaSimbolos.Simbolo;
+import TabelaSimbolos.SimboloMetodo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import modulo_completo.Category;
@@ -27,63 +28,79 @@ public class AnalisadorSemantico {
     }
     
     public void addSimbolo(Simbolo symbol){
-        
-        if(!searchSymbol(symbol, escopo_atual)){
+        Simbolo aux = searchSymbol(symbol, escopo_atual);
+        if(aux==null || (aux.getTipo().contains("heranca") && aux.getTipo().split(":")[0].equals(symbol.getTipo()) &&
+            ( ((SimboloMetodo)aux).ComparaParametros(((SimboloMetodo)symbol).getParametros()) )==null ) ){
+            
             escopo_atual.put(symbol.getLexeme(), symbol);
-        } else {
-            err_semantic.add(symbol.getLinha()+" ID já reservado e não pode ser sobrescrito");
+            
+        } else if(aux.getTipo().contains("heranca")){
+              
+            for(String str: ((SimboloMetodo)aux).ComparaParametros(((SimboloMetodo)symbol).getParametros()) ){
+                err_semantic.add(symbol.getLinha()+" "+str);
+            }
+//            err_semantic.add(symbol.getLinha()+" Sobrescrita do método "+symbol.getLexeme()
+//                    +" na classe mãe é inválida. "
+//                    + "Os tipos do retorno e dos parametros devem ser os mesmos");
+            
+        } else{
+            err_semantic.add(symbol.getLinha()+" ID "+symbol.getLexeme()+" já reservado e não pode ser sobrescrito");
         }
-        //System.out.println(escopo_atual.size());
+        System.out.println(escopo_atual.size());
     }
     
-    public boolean searchSymbol(Simbolo symbol, MyHashMap<String, Simbolo> start){
+    public Simbolo searchSymbol(Simbolo symbol, MyHashMap<String, Simbolo> start){
         MyHashMap<String, Simbolo> temp = start;
-        boolean same_scope=true, category=false;
+        boolean same_scope=true, category=false, heranca = false;
         Simbolo sy;
-        while( !(temp == null) ){
+        while( temp != null ){
             sy = temp.get(symbol.getLexeme());
             if( sy != null){
-                if( !(sy.getCategoria()==Category.VARIAVEL || sy.getCategoria()==Category.VETOR) ){
+                if( !(sy.getCategoria()==Category.VARIAVEL) ){
                     category = true;
                 }
                 
-                return (same_scope || category);
+                if (same_scope || category){
+                    if(heranca && sy instanceof SimboloMetodo && symbol instanceof SimboloMetodo){
+                        SimboloMetodo aux = new SimboloMetodo(Category.METODO);
+                        aux.setLexeme(sy.getLexeme());
+                        aux.setTipo(sy.getTipo().concat(":heranca"));
+                        aux.setLinha(sy.getLinha());
+                        aux.setParametros(((SimboloMetodo)sy).getParametros());
+                        return aux;
+                    } else
+                        return sy;
+                }
+                else
+                    return null;
             }
             
-            temp = temp.getUpper_scope();
-            same_scope = false;
+            if(temp.getDono()!=null && temp.getDono().getHeranca_pai()!=null){
+                temp = temp.getDono().getHeranca_pai().getInner_scope();
+                heranca = true;
+            } else {
+                temp = temp.getUpper_scope();
+                heranca = false;
+                same_scope = false;
+            }
         }
         
-        return false;
+        return null;
     }
     
     //Os proximos 4 métodos são usados para testar a compatibilidade dos tipos na atribuição à constantes
     public void matchTypeNum(String valor, String tipo, int line){
 
-                if( !(  ( tipo.equals(Simbolo.FLOAT) && valor.contains(".") ) ||
-                        ( tipo.equals(Simbolo.INT) && !( valor.contains(".") ) ) ) ){
-                    err_semantic.add(line+" Tipo incompatível: esperando "+tipo);
+                if( //!(  ( tipo.equals(Simbolo.FLOAT) && valor.contains(".") ) ||
+                        ( tipo.equals(Simbolo.INT) && ( valor.contains(".") ) )  ){
+                    err_semantic.add(line+" Token "+ valor + " incompatível: esperando "+tipo);
                 }
     }
     
-    public void matchTypeStr(String tipo, int line){
+    public void MatchType(String valor, String tipo_esperado, String tipo, int line){
 
-                if(!tipo.equals(Simbolo.STRING) ){
-                    err_semantic.add(line+" Tipo incompatível: esperando "+tipo);
-                }
-    }
-    
-    public void matchTypeChar(String tipo, int line){
-
-                if(!tipo.equals(Simbolo.CHAR)){
-                    err_semantic.add(line+" Tipo incompatível: esperando "+tipo);
-                }
-    }
-    
-    public void matchTypeBool(String tipo, int line){
-
-                if(!tipo.equals(Simbolo.BOOL)){
-                    err_semantic.add(line+" Tipo incompatível: esperando "+tipo);
+                if(!tipo.equals(tipo_esperado) ){
+                    err_semantic.add(line+" Tipo "+ valor + " incompatível: esperando "+tipo);
                 }
     }
     
@@ -101,20 +118,6 @@ public class AnalisadorSemantico {
     }
     
     //usado pra checar validade da herança de classes
-    public Simbolo SearchAndMatchCatg(String id, Category catg, MyHashMap<String, Simbolo> hash, int line){
-        Simbolo sy = hash.get(id);
-        if(sy!=null){
-            if(sy.getCategoria()!=catg){
-                err_semantic.add(line + " ID " + id +" não é "+catg.toString().toLowerCase());
-                return null;
-            }                
-            else
-                return sy;
-        }
-        err_semantic.add(line + " ID " + id+" não existe");
-        return null;
-    }
-    
     public boolean MatchTipoAndCatg(String id, ArrayList<Category> catg, String tipo, MyHashMap<String, Simbolo> hash, int line){
         MyHashMap<String, Simbolo> aux = hash;
         Simbolo sy = null;
